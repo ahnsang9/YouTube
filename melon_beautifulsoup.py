@@ -2,7 +2,6 @@ import requests
 from pandas import Series, DataFrame
 import pandas
 from bs4 import BeautifulSoup
-
 pandas.set_option('display.max_columns',10)
 header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'}
 for i in range(1):

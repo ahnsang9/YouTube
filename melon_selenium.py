@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
+import time
 
 titles = []
 singers = []
@@ -15,19 +16,26 @@ try:
             driver.find_element_by_xpath('//*[@id="pageObjNavgation"]/div/span/a[%d]' % page).click()
 
         try:
-            element = WebDriverWait(driver, 3).until(
-                EC.presence_of_element_located((By.ID, "pageObjNavgation"))
+            element = WebDriverWait(driver, 100).until(
+                EC.presence_of_element_located((By.ID, "footer"))
             )
         finally:
             pass
 
-        title =  driver.find_elements_by_class_name('ellipsis.rank01')
-        singer = driver.find_elements_by_class_name('ellipsis.rank02')
+        time.sleep(0.5)
+        while (True):
+            title =  driver.find_elements_by_class_name('ellipsis.rank01')
+            singer = driver.find_elements_by_class_name('ellipsis.rank02')
+            if len(title) > 49 and len(singer):
+                break
 
-        for i in title:
-            titles.append(i.text)
-        for i in singer:
-            singers.append(i.text)
+        try:
+            for i in title:
+                titles.append(i.text)
+            for i in singer:
+                singers.append(i.text)
+        except:
+            print("mc bal")
 
     df = pd.DataFrame({"title" : titles,
                        "singer" : singers})
