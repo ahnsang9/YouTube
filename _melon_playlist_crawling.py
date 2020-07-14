@@ -12,13 +12,14 @@ pw = 'wpgkrmfk1!'
 #driver.get("https://www.melon.com/index.htm") #멜론 메인 페이지
 #driver.find_element_by_xpath('//*[@id="gnbLoginDiv"]/div/button/span').click() #로그인 버튼
 
-driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe')
+driver = webdriver.Chrome('C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe')
 driver.get("https://member.melon.com/muid/web/login/login_inform.htm") #로그인 페이지
 window_before = driver.window_handles[0] #메인 페이지를 before로 지정
 driver.find_element_by_xpath('//*[@id="conts_section"]/div/div/div[1]/button/span').click() #카카오계정 로그인 버튼
+time.sleep(3)
 while(True):
     try:
-        window_after = driver.window_handles[1] #로그인창 생성되면 after로 지정
+        window_after = driver.window_handles[-1] #로그인창 생성되면 after로 지정
         break
     except:pass
 
