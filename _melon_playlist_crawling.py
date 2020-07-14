@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
 from pytube import YouTube
-
+#
 id = 'ahnsang9@naver.com'
 pw = 'wpgkrmfk1!'
 
