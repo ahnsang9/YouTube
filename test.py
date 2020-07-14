@@ -1,21 +1,16 @@
-from selenium import webdriver
+import requests
+import urllib.request
+from bs4 import BeautifulSoup
 import time
-import pandas as pd
+import re
+from selenium import webdriver
+header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'}
 
-driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe')
+url = 'https://www.youtube.com/channel/UCpSFkW-1TFYy--Ag7__0w5A/videos'
+result = requests.get(url, headers = header)
+obj = BeautifulSoup(result.text, "html.parser")
 
-driver.get("https://member.melon.com/muid/web/login/login_inform.htm")
+titles = obj.select("div.style-scope ytd-section-list-renderer a")
+#singers = obj.select("div.wrap_song_info div.rank02 span" )
 
-'''time.sleep(1)
-
-albums = []
-album =  driver.find_elements_by_xpath('//*[@id="frm"]/div/table/tbody/tr/td[5]/div/div/a')
-
-for i in album:
-    albums.append(i.text)
-
-pd.set_option('display.max_colwidth', None)
-df = pd.DataFrame({"album" : albums})
-print(df)'''
-
-
+print(titles)
