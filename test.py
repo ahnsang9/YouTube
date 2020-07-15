@@ -1,16 +1,66 @@
+import pandas as pd
 import requests
-import urllib.request
-from bs4 import BeautifulSoup
-import time
-import re
+from bs4 import BeautifulSoup as bs
 from selenium import webdriver
-header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'}
+import time
+from urllib.request import urlopen
+from pytube import YouTube
+import re
 
-url = 'https://www.youtube.com/channel/UCpSFkW-1TFYy--Ag7__0w5A/videos'
-result = requests.get(url, headers = header)
-obj = BeautifulSoup(result.text, "html.parser")
+# driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe') #크롬 드라이버 실행
 
-titles = obj.select("div.style-scope ytd-section-list-renderer a")
-#singers = obj.select("div.wrap_song_info div.rank02 span" )
+data = pd.read_excel('melon_힙_list.xlsx')  # 플레이리스트 엑셀에서 데이터 불러오기
+titles = data['title']
+singers = data['singer']
+albums = data['album']
 
-print(titles)
+urls = []
+# driver.get('https://www.youtube.com/')
+
+for i in range(10):
+    # time.sleep(1)
+    # element = driver.find_element_by_name("search_query") #search창 지정
+    # element.clear() #search창 클리어
+    # element.send_keys(f'{titles[i]} {singers[i]} {albums[i]}')
+    # element.send_keys(f'{titles[i]} {singers[i]} audio')
+
+    KEY = str(str(f'{titles[i]} {singers[i]} audio'.encode('utf8'))).replace("\\x", "%").replace("b'", "")
+    URL = "https://www.youtube.com/results?search_query=" + KEY
+
+    pattern = re.compile(r'\s+')
+    URL = re.sub(pattern, '', URL)
+    print(URL)
+    # driver.get(URL)
+
+    soup = bs(urlopen(URL), "html.parser", from_encoding='utf-8')
+    parselink = soup.find_all('div')
+    print(parselink)
+    # Link = "https://www.youtube.com" + parselink.get("href").replace("..", "").replace("./", "", 1)
+
+    time.sleep(3)
+    # driver.find_element_by_xpath('// *[ @ id = "search-icon-legacy"]').click() #돋보기버튼 클릭
+    '''while(True):
+        try:
+            #driver.find_element_by_xpath('//*[@id="video-title"]/yt-formatted-string').click()
+            #driver.find_element_by_xpath('//*[@id="video-title"]').click() #첫번째 영상 클릭
+            #hrefs = driver.find_element_by_xpath('//*[@id="video-title"]').get_attribute('href')
+            url = driver.current_url
+            a_tag = bs(requests.get(url).content, "html.parser").find("a",{'class':"yt-simple-endpoint style-scope ytd-video-renderer"})
+            print(a_tag["href"])
+            break
+        except:pass'''
+
+    # time.sleep(1)
+
+'''while(True):
+        try:
+            urls.append(driver.current_url) #현재 페이지 url 복사
+            break
+        except:pass'''
+
+print(urls)
+# driver.close()
+
+'''for i in urls:
+    yt = YouTube(i)
+    yt_streams = yt.streams'''
