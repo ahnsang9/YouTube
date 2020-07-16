@@ -1,6 +1,8 @@
 import pandas as pd
 from pytube import YouTube
-import __YouTube_link_selenium as link
+import ___YouTube_link_selenium as link
+import glob
+import os.path
 
 album_name = link.album_name
 data = pd.read_excel('멜론플레이리스트_%s_urls.xlsx'%album_name)
@@ -15,3 +17,4 @@ for i in range(count):
     my_stream.download('C:\\Users\82105\Desktop\YouTube')
     print("%d중 %d개 완료..."%(count, i+1))
 print('***** 다운완료 *****')
+
