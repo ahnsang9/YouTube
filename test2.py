@@ -1,60 +1,36 @@
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 import time
-from pytube import YouTube
-import re
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
-#driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe') #크롬 드라이버 실행
+driver = webdriver.Chrome('C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe')
+action = ActionChains(driver)
 
-data = pd.read_excel('melon_힙_list.xlsx') #플레이리스트 엑셀에서 데이터 불러오기
-titles = data['title']
-singers = data['singer']
-albums = data['album']
+driver.get('https://accounts.kakao.com/login?continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fclient_id%3D6cfb479f221a5adc670fe301e1b6690c%26redirect_uri%3Dhttps%253A%252F%252Fmember.melon.com%252Foauth.htm%26response_type%3Dcode%26state%3DtqwvR%2540t%252FeWbVEGGPRllAIOKVGlnYr9Vk7MMim6C6xG29W%2540ukELOWbfqLmL1bR1gkghWty%2540%252FFIc5D8FnDybJ%2540uA%253D%253D%26encode_state%3Dtrue')
+'''time.sleep(1)
+element = driver.find_element_by_name("search_query")
+element.send_keys(f'사계 태연 official audio mp3')
+driver.find_element_by_xpath('// *[ @ id = "search-icon-legacy"]').click()  # 검색버튼 클릭
 
-urls = []
-#driver.get('https://www.youtube.com/')
+time.sleep(1)
 
-for i in range(10):
-    #time.sleep(1)
-    #element = driver.find_element_by_name("search_query") #search창 지정
-    #element.clear() #search창 클리어
-    #element.send_keys(f'{titles[i]} {singers[i]} {albums[i]}')
-    #element.send_keys(f'{titles[i]} {singers[i]} audio')
-    KEY = str(f'{titles[i]} {singers[i]} audio'.encode('utf8')).replace("\\x", "%").replace("b'", "")
-    URL = str("https://www.youtube.com/results?search_query=" + KEY)
-    URL.replace(" ", "")
-    pattern = re.compile(r'\s+')
-    URL = re.sub(pattern, '', URL)
-    #driver.get(URL)
-    print(URL)
-    time.sleep(3)
-    #driver.find_element_by_xpath('// *[ @ id = "search-icon-legacy"]').click() #돋보기버튼 클릭
-    '''while(True):
-        try:
-            #driver.find_element_by_xpath('//*[@id="video-title"]/yt-formatted-string').click()
-            #driver.find_element_by_xpath('//*[@id="video-title"]').click() #첫번째 영상 클릭
-            #hrefs = driver.find_element_by_xpath('//*[@id="video-title"]').get_attribute('href')
-            url = driver.current_url
-            a_tag = bs(requests.get(url).content, "html.parser").find("a",{'class':"yt-simple-endpoint style-scope ytd-video-renderer"})
-            print(a_tag["href"])
+first = driver.find_element_by_xpath('/html/body/ytd-app/div/ytd-page-manager/'
+                                         'ytd-search/div[1]/ytd-two-column-search-'
+                                         'results-renderer/div/ytd-section-list-renderer'
+                                         '/div[2]/ytd-item-section-renderer/div[3]/ytd-video'
+                                         '-renderer[1]/div[1]/div/div[1]/div/h3/a')
+driver.execute_script("arguments[0].click();", first)
+mute = 0
+time.sleep(1)
+while(True):
+    try:
+        if mute == 0:
+            action.send_keys('m').perform()
+            mute = 1
             break
-        except:pass'''
-
-
-    #time.sleep(1)
-
-'''while(True):
-        try:
-            urls.append(driver.current_url) #현재 페이지 url 복사
-            break
-        except:pass'''
-
-print(urls)
-driver.close()
-
-'''for i in urls:
-    yt = YouTube(i)
-    yt_streams = yt.streams'''
-
+        print('시도중',end='')
+    except:
+        print('시도중', end='')
+        pass
+'''
