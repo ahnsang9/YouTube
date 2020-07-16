@@ -1,6 +1,6 @@
 from pytube import YouTube
 # 라이브러리 가져오기
-i = 'https://www.youtube.com/watch?v=RL-F3i8lZcM'
+i = 'https://www.youtube.com/watch?v=_f-1-GRaRbI'
 yt = YouTube(i)
 # 동영상 링크를 이용해 YouTube 객체 생성
 
