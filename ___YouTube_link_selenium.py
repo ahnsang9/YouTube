@@ -25,7 +25,7 @@ driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
 #driver = webdriver.Chrome(mp.driver_path,chrome_options=options)
 #list_name = mp.list_name
 #data = pd.read_excel('멜론플레이리스트_%s.xlsx'%list_name)  # 플레이리스트 엑셀에서 데이터 불러오기
-data = pd.read_excel('멜론플레이리스트_힙.xlsx')
+data = pd.read_excel('멜론플레이리스트_90-00.xlsx')
 titles = data['title']
 singers = data['singer']
 albums = data['album']
@@ -59,8 +59,11 @@ for i in range(len(titles)):
             except:pass
 driver.quit()
 
+youtube_titles = []
+
 for i in range(len(titles)):
     yt = YouTube(urls[i])
+    youtube_titles.append(yt.title)
     yt_streams = yt.streams
     yt.streams.filter(only_audio=True)
     itag = 140
