@@ -8,6 +8,18 @@ import time
 id = 'ahnsang9@naver.com'
 pw = 'wpgkrmfk1!'
 
+while 1:
+    print('데탑이면 1 , 랩탑이면 2')
+    num = int(input())
+    if num == 1:
+        driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
+        break
+    elif num == 2:
+        driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
+        break
+    else:
+        print('???\n')
+
 options = webdriver.ChromeOptions()
 # headless 옵션 설정
 options.add_argument('headless')
@@ -18,10 +30,10 @@ options.add_argument('window-size=1920x1080')
 options.add_argument("disable-gpu")   # 가속 사용 x
 options.add_argument("lang=ko_KR")    # 가짜 플러그인 탑재
 
-driver = webdriver.Chrome('C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe',chrome_options=options) #크롬 실행
+driver = webdriver.Chrome(driver_path,chrome_options=options)
 before_login = len(driver.window_handles) #시작시 윈도우 수
 driver.get("https://accounts.kakao.com/login?continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fclient_id%3D6cfb479f221a5adc670fe301e1b6690c%26redirect_uri%3Dhttps%253A%252F%252Fmember.melon.com%252Foauth.htm%26response_type%3Dcode%26state%3DtqwvR%2540t%252FeWbVEGGPRllAIOKVGlnYr9Vk7MMim6C6xG29W%2540ukELOWbfqLmL1bR1gkghWty%2540%252FFIc5D8FnDybJ%2540uA%253D%253D%26encode_state%3Dtrue")
-#로그인 페이지
+#멜론 로그인 페이지
 while 1:
     try:
         element = driver.find_element_by_xpath('//*[@id="id_email_2"]')
@@ -47,12 +59,12 @@ while 1:
         break
     except:pass
 
-album_name = driver.find_elements_by_xpath('//*[@id="pageList"]/table/tbody/tr/td[2]/div/div/dl/dt/a')
-album_names = []
+list_name = driver.find_elements_by_xpath('//*[@id="pageList"]/table/tbody/tr/td[2]/div/div/dl/dt/a')
+list_names = []
 k = 0
-for i in album_name:
+for i in list_name:
     k += 1
-    album_names.append(i.text)
+    list_names.append(i.text)
     print('%d : '%k + i.text)
 print('\n다운로드 원하는 playlist 번호를 입력하세요 : ')
 num = int(input())
@@ -96,7 +108,7 @@ while 1:
 df = pd.DataFrame({"title" : titles,
                    "singer" : singers,
                    "album" : albums})
-df.to_excel("멜론플레이리스트_%s.xlsx"%album_names[num-1])
-album_name = album_names[num-1]
+df.to_excel("멜론플레이리스트_%s.xlsx"%list_names[num-1])
+list_name = list_names[num-1]
 driver.quit()
-print('\nplaylist 다운 완료\n')
+print('\n*****playlist 다운 완료*****\n')

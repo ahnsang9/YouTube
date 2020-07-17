@@ -1,38 +1,43 @@
-import pandas as pd
 from selenium import webdriver
-import time
-import ____melon_playlist_crawling as mp
 from selenium.webdriver.common.action_chains import ActionChains
+from pytube import YouTube
+import time
+import pandas as pd
+import glob
+import os.path
+#import ____melon_playlist_crawling as mp
+
+####################################################################################################################
+download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
+####################################################################################################################
 
 options = webdriver.ChromeOptions()
 # headless 옵션 설정
-options.add_argument('headless')
-options.add_argument("no-sandbox")
-
+#options.add_argument('headless')
+#options.add_argument("no-sandbox")
 # 브라우저 윈도우 사이즈
 options.add_argument('window-size=1920x1080')
-
 # 사람처럼 보이게 하는 옵션들
 options.add_argument("disable-gpu")   # 가속 사용 x
 options.add_argument("lang=ko_KR")    # 가짜 플러그인 탑재
 
-driver = webdriver.Chrome('C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe',chrome_options=options)
-album_name = mp.album_name
-data = pd.read_excel('멜론플레이리스트_%s.xlsx'%album_name)  # 플레이리스트 엑셀에서 데이터 불러오기
+driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe',chrome_options=options)
+#driver = webdriver.Chrome(mp.driver_path,chrome_options=options)
+#list_name = mp.list_name
+#data = pd.read_excel('멜론플레이리스트_%s.xlsx'%list_name)  # 플레이리스트 엑셀에서 데이터 불러오기
+data = pd.read_excel('멜론플레이리스트_힙.xlsx')
 titles = data['title']
 singers = data['singer']
 albums = data['album']
 
-urls = []
 driver.get('https://www.youtube.com/')
 
 action = ActionChains(driver) #단축키 보내기
 mute = 0
-
+urls = []
 for i in range(len(titles)):
     element = driver.find_element_by_name("search_query") #search창 지정
     element.clear() #search창 클리어
-    #element.send_keys(f'{titles[i]} {singers[i]} {albums[i]}')
     element.send_keys(f'{titles[i]} {singers[i]} official audio mp3')
     driver.find_element_by_xpath('// *[ @ id = "search-icon-legacy"]').click() #검색버튼 클릭
 
@@ -52,8 +57,26 @@ for i in range(len(titles)):
                     break
                 else:continue
             except:pass
-    print('%d중 %d번째 완료...'%(len(titles),i+1))
 driver.quit()
-df = pd.DataFrame({'urls' : urls})
-df.to_excel("멜론플레이리스트_%s_urls.xlsx"%album_name, encoding='utf-8')
-print('***** url 다운 완료 *****')
+
+for i in range(len(titles)):
+    yt = YouTube(urls[i])
+    yt_streams = yt.streams
+    yt.streams.filter(only_audio=True)
+    itag = 140
+    my_stream = yt_streams.get_by_itag(itag)
+
+    # my_stream.download('C:\\Users\82105\Desktop\YouTube') #데탑
+    my_stream.download(download_path) #랩탑
+    print('%s 완료...'%titles[i])
+
+files = glob.glob(download_path + "\*.mp4")
+for x in files:
+    if not os.path.isdir(x):
+        filename = os.path.splitext(x)
+        try:
+            os.rename(x,filename[0] + '.mp3')
+        except:
+            pass
+
+print('\n***** 변환완료 *****\n')
