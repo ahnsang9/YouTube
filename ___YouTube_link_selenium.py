@@ -5,11 +5,25 @@ import time
 import pandas as pd
 import glob
 import os.path
+import eyed3
 #import ____melon_playlist_crawling as mp
 
 ####################################################################################################################
-download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
+download_path = ''
 ####################################################################################################################
+while 1:
+    print('데탑이면 1 , 랩탑이면 2')
+    num = int(input())
+    if num == 1:
+        driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
+        download_path = 'C:\\Users\82105\Desktop\YouTube'
+        break
+    elif num == 2:
+        driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
+        download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
+        break
+    else:
+        print('???\n')
 
 options = webdriver.ChromeOptions()
 # headless 옵션 설정
@@ -21,7 +35,7 @@ options.add_argument('window-size=1920x1080')
 options.add_argument("disable-gpu")   # 가속 사용 x
 options.add_argument("lang=ko_KR")    # 가짜 플러그인 탑재
 
-driver = webdriver.Chrome('C:\\Users\안상훈\PycharmProjects\chromedriver.exe',chrome_options=options)
+driver = webdriver.Chrome(driver_path,chrome_options=options)
 #driver = webdriver.Chrome(mp.driver_path,chrome_options=options)
 #list_name = mp.list_name
 #data = pd.read_excel('멜론플레이리스트_%s.xlsx'%list_name)  # 플레이리스트 엑셀에서 데이터 불러오기
@@ -49,7 +63,7 @@ for i in range(len(titles)):
             try:
                 url = driver.current_url
                 if mute == 0:
-                    time.sleep(1)
+                    time.sleep(0.5)
                     action.send_keys('m').perform() #단축키 m으로 음소거
                     mute = 1
                 if url[:29] == 'https://www.youtube.com/watch':
@@ -59,27 +73,31 @@ for i in range(len(titles)):
             except:pass
 driver.quit()
 
-youtube_titles = []
-
 for i in range(len(titles)):
     yt = YouTube(urls[i])
-    youtube_titles.append(yt.title)
     yt_streams = yt.streams
     yt.streams.filter(only_audio=True)
     itag = 140
     my_stream = yt_streams.get_by_itag(itag)
 
-    # my_stream.download('C:\\Users\82105\Desktop\YouTube') #데탑
-    my_stream.download(download_path) #랩탑
+    # my_stream.download('C:\\Users\82105\Desktop\YouTube','%s'%yt_title) #데탑
+    my_stream.download(download_path,'%s'%titles[i]) #랩탑
     print('%s 완료...'%titles[i])
 
-files = glob.glob(download_path + "\*.mp4")
+'''files = glob.glob(download_path + "\*.mp4")
 for x in files:
     if not os.path.isdir(x):
         filename = os.path.splitext(x)
         try:
             os.rename(x,filename[0] + '.mp3')
         except:
-            pass
+            pass'''
+for i in range(len(titles)):
+    song = eyed3.load("C:\\Users\82105\Desktop\YouTube\%s.mp3" % titles[i])
+    song.tag.title = ['%s' % titles[i]]
+    song.tag.artist = ['%s' % singers[i]]
+    song.tags.album = ['%s' % albums[i]]
+    song.tag.save()
+    print(song.tags)
 
 print('\n***** 변환완료 *****\n')
