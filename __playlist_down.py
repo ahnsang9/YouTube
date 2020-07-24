@@ -23,7 +23,7 @@ while 1:
         break
     elif num == 2:
         driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
-        download_path = ''
+        download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
         break
     else:
         print('???\n')
@@ -85,7 +85,7 @@ while 1:
 selected_list_name = list_names[num-1]
 number_of_songs = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div/table/tbody/tr[%d]/td[3]/div/p'%num)
 number_of_songs = int(number_of_songs.text[8:-1])
-driver.find_element_by_xpath('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/div/dl/dt/a'%num).click() #원하는 플레이리스트로 이동driver.find_element_by_xpath('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/div/dl/dt/a'%num).click() #원하는 플레이리스트로 이동
+driver.find_element_by_xpath('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/div/dl/dt/a'%num).click() #원하는 플레이리스트로 이동
 
 titles = []
 singers = []
@@ -94,7 +94,7 @@ albums = []
 page = 1
 count = 0
 id = driver.current_url[-9:]
-fixed_current_playlist_url = 'https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s'%id+'#params%5BplylstSeq%5D=%s'%id+'&po=pageObj&startIndex='
+fixed_current_playlist_url = 'https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s#params%%5BplylstSeq%%5D=%s&po=pageObj&startIndex='%(id,id)
 
 
 pbar = tqdm(total=number_of_songs,desc='플레이리스트 목록 다운중..')
