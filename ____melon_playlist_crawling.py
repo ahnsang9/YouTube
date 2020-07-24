@@ -5,10 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from pytube import YouTube
 import time
-import pandas as pd
 import eyed3
 import glob
 import os
+import subprocess
 
 id = 'ahnsang9@naver.com'
 pw = 'wpgkrmfk1!'
@@ -22,7 +22,7 @@ while 1:
         break
     elif num == 2:
         driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
-        download_pate = ''
+        download_pate = 'C:\\Users\안상훈\Desktop\youtube_download'
         break
     else:
         print('???\n')
@@ -163,12 +163,16 @@ for i in range(len(titles)):
 
 files = glob.glob(download_path + "\*.mp4")
 for x in files:
-    if not os.path.isdir(x):
+    '''if not os.path.isdir(x):
         filename = os.path.splitext(x)
         try:
             os.rename(x,filename[0] + '.mp3')
         except:
-            pass
+            pass'''
+    s = x.split('.')[0] + '.mp3'
+    cmds = ['ffmpeg', '-i', x, '-vn', '-ab', '192K', '-y', s]
+    subprocess.Popen(cmds)
+    print('Converting', x, 'to', s)
 for i in range(len(titles)):
     song = eyed3.load("C:\\Users\82105\Desktop\YouTube\%s.mp3" % titles[i])
     song.tag.title = ['%s' % titles[i]]
