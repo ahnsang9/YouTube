@@ -92,14 +92,10 @@ singers = []
 albums = []
 
 page = 1
-count = 0
 id = driver.current_url[-9:]
-fixed_current_playlist_url = 'https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s#params%%5BplylstSeq%%5D=%s&po=pageObj&startIndex='%(id,id)
-
-
 pbar = tqdm(total=number_of_songs,desc='플레이리스트 목록 다운중..')
 while 1:
-    driver.get(fixed_current_playlist_url + '%d'%page) #페이지 이동
+    driver.get('https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s#params%%5BplylstSeq%%5D=%s&po=pageObj&startIndex=%d'%(id,id,page)) #페이지 이동
     '''try:
         element = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "pop_isms")))
     finally:
@@ -119,6 +115,8 @@ while 1:
     for i in album:
         albums.append(i.text)
 
+
+        album_id.append(driver.find)
     page += 50
     pbar.update(len(title))
 pbar.close()
