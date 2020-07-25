@@ -1,46 +1,61 @@
 import requests
-from bs4 import BeautifulSoup
+import json
+from bs4 import BeautifulSoup as bs
 
-login_url = 'http://www.hanbit.co.kr/member/login_proc.php'
+def web_request(method_name, url, dict_data, is_urlencoded=True):
+    """Web GET or POST request를 호출 후 그 결과를 dict형으로 반환 """
+    method_name = method_name.upper()  # 메소드이름을 대문자로 바꾼다
+    if method_name not in ('GET', 'POST'):
+        raise Exception('method_name is GET or POST plz...')
 
-user = ''
-password = ''
+    if method_name == 'GET':  # GET방식인 경우
+        response = requests.get(url=url, params=dict_data)
+    elif method_name == 'POST':  # POST방식인 경우
+        if is_urlencoded is True:
+            response = requests.post(url=url, data=dict_data,
+                                     headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        else:
+            response = requests.post(url=url, data=json.dumps(dict_data), headers={'Content-Type': 'application/json'})
 
-# requests.session 메서드는 해당 reqeusts를 사용하는 동안 cookie를 header에 유지하도록 하여
-# 세션이 필요한 HTTP 요청에 사용됩니다.
-session = requests.session()
+    dict_meta = {'status_code': response.status_code, 'ok': response.ok, 'encoding': response.encoding,
+                 'Content-Type': response.headers['Content-Type']}
+    if 'json' in str(response.headers['Content-Type']):  # JSON 형태인 경우
+        return {**dict_meta, **response.json()}
+    else:  # 문자열 형태인 경우
+        return {**dict_meta, **{'text': response.text}}
 
-params = dict()
-params['m_id'] = user
-params['m_passwd'] = password
+# GET방식 호출 테스트
+url  = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fclient_id%3D6cfb479f221a5adc670fe301e1b6690c%26redirect_uri%3Dhttps%253A%252F%252Fmember.melon.com%252Foauth.htm%26response_type%3Dcode%26state%3DmKzaPWr6tQ%2540OGJOvAySTa12df4ePULTkTLSVV803qKujPy9GC0O0HaJu2kTwM6ITrx8Pi94g6tQgRs3DHXPufg%253D%253D%26encode_state%3Dtrue' # 접속할 사이트주소 또는 IP주소를 입력한다
+data = {'id_email_2' : 'ahnsang9@nave.com',
+        'id_password_3' : 'wpgk!'}    # 요청할 데이터
 
-# javascrit(jQuery) 코드를 분석해보니, 결국 login_proc.php 를 m_id 와 m_passwd 값과 함께
-# POST로 호출하기 때문에 다음과 같이 requests.session.post() 메서드를 활용하였습니다.
-# 실제코드: <form name="frm"  id="frm"  action="#" method="post">
-res = session.post(login_url, data = params)
+with requests.Session() as s:
+    response = s.get(url=url, params=data)
+    #response = web_request(method_name='GET', url=url, dict_data=data)
 
-# 응답코드가 200 즉, OK가 아닌 경우 에러를 발생시키는 메서드입니다.
-res.raise_for_status()
+    dict_meta = {'status_code': response.status_code, 'ok': response.ok, 'encoding': response.encoding,
+                     'Content-Type': response.headers['Content-Type']}
 
-# 'Set-Cookie'로 PHPSESSID 라는 세션 ID 값이 넘어옴을 알 수 있다.
-# print(res.headers)
+    if 'json' in str(response.headers['Content-Type']):  # JSON 형태인 경우
+        response = {**dict_meta, **response.json()}
+    else:  # 문자열 형태인 경우
+        response = {**dict_meta, **{'text': response.text}}
+    print(response)
 
-# cookie로 세션을 로그인 상태를 관리하는 상태를 확인해보기 위한 코드입니다.
-# print(session.cookies.get_dict())
+    if response['ok'] == True:
+        print ('성공')
+        # 성공 응답 시 액션
+    else:
+        pass
+        # 실패 응답 시 액션
+    main_page = s.get('https://www.melon.com/mymusic/playlist/mymusicplaylist_list.htm?memberKey=38091076')
+    soup = bs(main_page.text,'html.parser')
+    print(soup.select('body'))
 
-# 여기서부터는 로그인이 된 세션이 유지됩니다. session 에 header에는 Cookie에 PHPSESSID가 들어갑니다.
-mypage_url = 'http://www.hanbit.co.kr/myhanbit/myhanbit.html'
-res = session.get(mypage_url)
+    if response['ok'] == True:
+        print ('성공')
+        # 성공 응답 시 액션
+    else:
+        pass
 
-# 응답코드가 200 즉, OK가 아닌 경우 에러를 발생시키는 메서드입니다.
-res.raise_for_status()
 
-soup = BeautifulSoup(res.text, 'html.parser')
-
-# Chrome 개발자 도구에서 CSS SELECTOR를 통해 간단히 가져온 CSS SELECTOR 표현식을 사용
-he_coin = soup.select_one('#container > div > div.sm_mymileage > dl.mileage_section2 > dd > span')
-
-# 다음과 같이 class를 .mileage_section2 로 그리고 그 하부 태그중에 span이 있다는 식으로 표현도 가능함
-# he_coin = soup.select_one('.mileage_section2 span')
-
-print ('mileage is', he_coin.get_text())
