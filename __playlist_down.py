@@ -10,13 +10,15 @@ import glob
 import os
 from pydub import AudioSegment
 from tqdm import tqdm
+import requests
 
 id = 'ahnsang9@naver.com'
 pw = 'wpgkrmfk1!'
 
 while 1:
     print('데탑 -> 1\n랩탑 -> 2')
-    num = int(input())
+    #num = int(input())
+    num = 2
     if num == 1:
         driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
         download_path = 'C:\\Users\82105\Desktop\YouTube'
@@ -77,7 +79,8 @@ for i in list_name:
 
 while 1:
     print('\n다운로드 원하는 playlist 번호를 입력하세요')
-    num = int(input())
+    #num = int(input())
+    num = 2
     if num > 0 & num <= len(list_names):
         break
     else :
@@ -90,6 +93,7 @@ driver.find_element_by_xpath('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/d
 titles = []
 singers = []
 albums = []
+image_urls = []
 
 page = 1
 count = 0
@@ -111,14 +115,30 @@ while 1:
         break
     singer = driver.find_elements_by_id('artistName')
     album = driver.find_elements_by_xpath('//*[@id="frm"]/div/table/tbody/tr/td[5]/div/div/a')
-
+    name = []
     for i in title:
         titles.append(i.text)
+        name.append(i.text)
     for i in singer:
         singers.append(i.text)
     for i in album:
         albums.append(i.text)
 
+    temp = driver.find_elements_by_class_name('btn_icon_detail')
+    cover =[]
+    lyrics = []
+    for i in range(len(temp)):
+        cover.append('https://www.melon.com/song/detail.htm?songId=%d'%(int(temp[i].get_attribute('href')[36:-3])))
+    for i in range(len(cover)):
+        driver.get('%s'%cover[i])
+        img = requests.get(driver.find_element_by_xpath('/html/body/div[1]/div[3]/div/div/div/form/div/div/div[1]/a/img').get_attribute('src'))
+        with open(download_path + '\%s.jpg'%(name[i]), 'wb') as writer:  # open for writing in binary mode
+            writer.write(img.content)  # write the image
+        lyrics.append(driver.find_elements_by_class_name('lyric'))
+    for i in range(len(lyrics)):
+        for j in range(len(lyrics[i])):
+            lyrics[i][j] = lyrics[i][j].text
+            print(lyrics[i][j])
     page += 50
     pbar.update(len(title))
 pbar.close()
@@ -185,4 +205,5 @@ for i in range(len(titles)):  #태그 초기화
     song.tag.title = '%s' % titles[i]
     song.tag.artist = '%s' % singers[i]
     song.tag.album = '%s' % albums[i]
+    song.tag.track_num = i
     song.tag.save()
