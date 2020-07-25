@@ -11,24 +11,17 @@ import os
 from pydub import AudioSegment
 from tqdm import tqdm
 import requests
+import platform
 
 id = 'ahnsang9@naver.com'
 pw = 'wpgkrmfk1!'
 
-while 1:
-    print('데탑 -> 1\n랩탑 -> 2')
-    #num = int(input())
-    num = 2
-    if num == 1:
-        driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
-        download_path = 'C:\\Users\82105\Desktop\YouTube'
-        break
-    elif num == 2:
-        driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
-        download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
-        break
-    else:
-        print('???\n')
+if platform.node() == 'DESKTOP-DSPFGTE':
+    driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
+    download_path = 'C:\\Users\82105\Desktop\YouTube'
+else:
+    driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
+    download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
 
 options = webdriver.ChromeOptions()
 # headless 옵션 설정
