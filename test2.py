@@ -80,7 +80,7 @@ while 1:
         break
     else :
         print('잘못 입력했습니다.')
-selected_list_name = list_names[num-1]
+list_names[num] = list_names[num-1]
 number_of_songs = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div/table/tbody/tr[%d]/td[3]/div/p'%num)
 number_of_songs = int(number_of_songs.text[8:-1])
 driver.find_element_by_xpath('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/div/dl/dt/a'%num).click() #원하는 플레이리스트로 이동
