@@ -8,6 +8,8 @@ from pydub import AudioSegment
 from tqdm import tqdm
 import requests
 import platform
+from bs4 import BeautifulSoup
+from urllib.request import urlretrieve
 
 
 def click(xpath, number):
@@ -21,6 +23,33 @@ def click(xpath, number):
         except:pass
 
 
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('같은 폴더가 있습니다')
+
+
+
+
+def bs_crawling(url,list):
+    def try_(munjang):
+        try:
+            munjang
+        except:
+            pass
+    soup = BeautifulSoup(session.get(url,headers = headers).text,'html.parser')
+    try_(list[3].append(soup.select('#downloadfrm > div > div > div.entry > div.meta > dl > dd:nth-child(6)')[0].text))
+    try_(list[0].append(soup.select('#downloadfrm > div > div > div.entry > div.info > div.song_name')[0].text.replace('\n','').replace('\t','').replace('\r','')[2:]))
+    try_(list[1].append(soup.select('#downloadfrm > div > div > div.entry > div.info > div.artist > a')[0].text))
+    try_(list[2].append(soup.select('#downloadfrm > div > div > div.entry > div.meta > dl > dd:nth-child(2) > a')[0].text))
+    try_(list[5].append(soup.select('#d_video_summary')[0].get_text(separator='\n').replace('\t','').replace('\r','')))
+    try_(list[4].append(soup.select('#downloadfrm > div > div > div.thumb > a > img')[0]['src']))
+
+headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"}
+session = requests.Session()
+
 ID = 'ahnsang9@naver.com'
 PW = 'wpgkrmfk1!'
 
@@ -32,8 +61,8 @@ else:
     download_path = 'C:\\Users\안상훈\Desktop\youtube_download'
 
 options = webdriver.ChromeOptions()
-#options.add_argument('headless')  # headless 옵션 설정
-#options.add_argument("no-sandbox")  # headless 옵션 설정
+options.add_argument('headless')  # headless 옵션 설정
+options.add_argument("no-sandbox")  # headless 옵션 설정
 options.add_argument('window-size=1920x1080')  # 브라우저 윈도우 사이즈
 options.add_argument("disable-gpu")  # 사람처럼 보이게 하는 옵션들 # 가속 사용 x
 options.add_argument("lang=ko_KR")  # 사람처럼 보이게 하는 옵션들 # 가짜 플러그인 탑재
@@ -57,14 +86,11 @@ while 1:
 driver.switch_to.window(driver.window_handles[-1])  # 새로생긴창 활성화
 click('//*[@id="gnb_menu"]/ul[2]/li[1]/a/span[2]',1)  # 마이뮤직 버튼
 click('//*[@id="conts"]/div[1]/ul/li[3]/a/span',1)  # 플레이리스트 버튼
-
 list_names = [x.text for x in driver.find_elements_by_xpath('//*[@id="pageList"]/table/tbody/tr/td[2]/div/div/dl/dt/a')]
-print(list_names)
-print(*list_names, sep='\n')
+print(*list_names, sep='  ')
 while 1:
     print('\n다운로드 원하는 playlist 번호를 입력하세요')
-    #num = int(input())-1
-    num = 1
+    num = int(input())-1
     if 0 <= num & num <= len(list_names)-1:
         break
     else:
@@ -73,71 +99,28 @@ while 1:
 
 number_of_songs = int(driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div/table/tbody/tr[%d]/td[3]/div/p'%(num+1)).text[8:-1])
 click('//*[@id="pageList"]/table/tbody/tr[%d]/td[2]/div/div/dl/dt/a'%(num+1),1)  # 원하는 플레이리스트로 이동
-
-
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('같은 폴더가 있습니다')
 createFolder(download_path + '\%s'%list_names[num])
 
-song_info = [[],[],[],[],[]]  # titles, singers, albums, image_urls, lyrics
-titles = []
-singers = []
-albums = []
-image_urls = []
-
-page = 1
+info = [[],[],[],[],[],[]]  # 제목, 가수, 앨범, 장르, 커버사진, 가사
 url_id = driver.current_url[-9:]
-pbar = tqdm(total=number_of_songs,desc='플레이리스트 목록 다운중..')
-while 1:
+for i in tqdm(range(number_of_songs//50+1),desc='플레이리스트 정보 다운중...'):
     driver.get('https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s'
-               '#params%%5BplylstSeq%%5D=%s&po=pageObj&startIndex=%d' % (url_id, url_id, page))  # 페이지 이동
+               '#params%%5BplylstSeq%%5D=%s&po=pageObj&startIndex=%d' % (url_id, url_id, 50*i+1))  # 페이지 이동
     time.sleep(1)
-    title = driver.find_elements_by_xpath('//*[@id="frm"]/div/table/tbody/tr/td[3]/div/div/a[1]/span')
-    singer = driver.find_elements_by_id('artistName')
-    album = driver.find_elements_by_xpath('//*[@id="frm"]/div/table/tbody/tr/td[5]/div/div/a')
+    song_url = ['https://www.melon.com/song/detail.htm?songId=' + x.get_attribute('href')[36:-3] for x in driver.find_elements_by_class_name('btn_icon_detail')]
 
-    name = []
-    for i in title:
-        titles.append(i.text)
-        name.append(i.text)
-    for i in singer:
-        singers.append(i.text)
-    for i in album:
-        albums.append(i.text)
-
-    temp = driver.find_elements_by_class_name('btn_icon_detail')
-    temp_cover =[]
-    lyrics = []
-    for i in range(len(temp)):
-        temp_cover.append('https://www.melon.com/song/detail.htm?songId=%d'%(int(temp[i].get_attribute('href')[36:-3])))
-    for i in range(len(temp_cover)):
-        driver.get(temp_cover[i])
-        img = requests.get(driver.find_element_by_xpath('/html/body/div[1]/div[3]/div/div/div/form/div/div/div[1]/a/img').get_attribute('src'))
-        with open(download_path + '\%s'%list_names[num] + '\%s.jpg'%(name[i]), 'wb') as writer:  # open for writing in binary mode
-            writer.write(img.content)  # write the image
-    page += 50
-    pbar.update(len(title))
-    if len(title) < 50:
-        break
-'''        lyrics.append(driver.find_elements_by_class_name('lyric'))
-    for i in range(len(lyrics)):
-        for j in range(len(lyrics[i])):
-            lyrics[i][j] = lyrics[i][j].text
-            print(lyrics[i][j])'''
-pbar.close()
-
+    for j in range(len(song_url)):
+        bs_crawling(song_url[j],info)
+        img_src = info[4][j]
+        urlretrieve(img_src, download_path + '\%s'%list_names[num] + '\%s.jpg'%(50*i+j))
 
 driver.get('https://www.youtube.com/')
 mute = 0
 yt_urls = []
-for i in tqdm(range(len(titles)),desc='url 복사중..'):
+for i in tqdm(range(number_of_songs),desc='url 복사중..'):
     element = driver.find_element_by_name("search_query")  # search창 지정
     element.clear()  # search창 클리어
-    element.send_keys(f'{titles[i]} {singers[i]} official audio mp3')
+    element.send_keys(f'{info[0][i]} {info[1][i]} official audio mp3')
     click('//*[@id="search-icon-legacy"]',1)  # 검색버튼 클릭
     click('//*[@id="thumbnail"]/yt-img-shadow',2)
     time.sleep(1)
@@ -148,13 +131,13 @@ for i in tqdm(range(len(titles)),desc='url 복사중..'):
     yt_urls.append(yt_url_temp)
 driver.quit()
 
-for i in tqdm(range(len(titles)), desc='mp4 다운중..'):
+for i in tqdm(range(number_of_songs), desc='mp4 다운중..'):
     try:
         yt = YouTube(yt_urls[i])
         yt_streams = yt.streams
         yt.streams.filter(only_audio=True)
         my_stream = yt_streams.get_by_itag(140)
-        my_stream.download(download_path + '\%s' % list_names[num], '%s' % titles[i])
+        my_stream.download(download_path + '\%s' % list_names[num], '%s' % info[0][i])
     except:pass
 
 
@@ -165,11 +148,12 @@ for i in tqdm(range(len(temp)),desc='mp4 -> mp3 변환중..'):
     AudioSegment.from_file(temp[i]).export(mp3_filename, format='mp3')
 
 
-for i in range(len(titles)):  # 태그 초기화
-    song = eyed3.load(download_path + "\%s\%s.mp3" %(list_names[num], titles[i]))
-    song.tag.title = '%s' % titles[i]
-    song.tag.artist = '%s' % singers[i]
-    song.tag.album = '%s' % albums[i]
+for i in range(number_of_songs):  # 태그 초기화
+    song = eyed3.load(download_path + "\%s\%s.mp3" %(list_names[num], info[0][i]))
+    song.tag.title = '%s' % info[0][i]
+    song.tag.artist = '%s' % info[1][i]
+    song.tag.album = '%s' % info[2][i]
     song.tag.track_num = i
-    song.tag.images.set(3, open(download_path + "\%s\%s.jpg" %(list_names[num], titles[i]), 'rb').read(), 'image/jpeg')
+    song.tag.images.set(3, open(download_path + "\%s\%d.jpg" %(list_names[num], i), 'rb').read(), 'image/jpeg')
+    song.tag.lyrics.set(info[5][i])
     song.tag.save(version=eyed3.id3.ID3_V2_3)
