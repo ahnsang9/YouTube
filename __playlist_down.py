@@ -141,3 +141,6 @@ for i in range(number_of_songs):  # 태그 초기화
     song.tag.images.set(3, open(download_path + "\%s\%d.jpg" %(list_names[num], info[0][i]), 'rb').read(), 'image/jpeg')
     song.tag.lyrics.set(info[5][i])
     song.tag.save(version=eyed3.id3.ID3_V2_3)
+
+[os.remove(f) for f in glob.glob(download_path + "\%s"%list_names[num] +'\*.jpg')]
+[os.remove(f) for f in glob.glob(download_path + "\%s"%list_names[num] +'\*.mp4')]
