@@ -1,15 +1,17 @@
 from selenium import webdriver
 from pytube import YouTube
+from bs4 import BeautifulSoup
+from urllib.request import urlretrieve
+from selenium.webdriver.common.keys import Keys
+from pydub import AudioSegment
+from tqdm import tqdm
 import time
 import eyed3
 import glob
 import os
-from pydub import AudioSegment
-from tqdm import tqdm
 import requests
 import platform
-from bs4 import BeautifulSoup
-from urllib.request import urlretrieve
+
 
 
 def click(xpath, number):
@@ -110,9 +112,8 @@ for i in tqdm(range(number_of_songs),desc='url 복사중..'):
     element = driver.find_element_by_name("search_query")  # search창 지정
     element.clear()  # search창 클리어
     element.send_keys(f'{info[0][i]} {info[1][i]} official audio mp3')
-    click('//*[@id="search-icon-legacy"]',1)  # 검색버튼 클릭
-    click('//*[@id="thumbnail"]/yt-img-shadow',2)
-    time.sleep(1)
+    element.send_keys(Keys.RETURN)  # 엔터
+    time.sleep(0.5)
     yt_url_temp = driver.find_element_by_xpath('/html/body/ytd-app/div/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/ytd-thumbnail/a').get_attribute('href')
     yt_urls.append(yt_url_temp)
 
@@ -138,7 +139,7 @@ for i in range(number_of_songs):  # 태그 초기화
     song.tag.artist = '%s' % info[1][i]
     song.tag.album = '%s' % info[2][i]
     song.tag.track_num = i
-    song.tag.images.set(3, open(download_path + "\%s\%d.jpg" %(list_names[num], info[0][i]), 'rb').read(), 'image/jpeg')
+    song.tag.images.set(3, open(download_path + "\%s\%s.jpg" %(list_names[num], info[0][i]), 'rb').read(), 'image/jpeg')
     song.tag.lyrics.set(info[5][i])
     song.tag.save(version=eyed3.id3.ID3_V2_3)
 

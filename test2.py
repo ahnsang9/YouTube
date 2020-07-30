@@ -1,9 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
+from youtube_api import YoutubeDataApi
 
-session = requests.Session()
-headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36"}
-a = session.get('https://www.youtube.com/channel/UC3SyT4_WLHzN7JmHQwKQZww', headers=headers)
-print(a)
-soup = BeautifulSoup(a.text, 'html.parser')
-print(soup.select('#subscriber-count'))
+yt = YoutubeDataApi('AIzaSyCrtDBAVoMU0We-M7TIHDbGyuYGhQycqnA')
+
+searches = yt.search(q='저스디스', max_results=1)
+print('https://www.youtube.com/watch?v=' + searches[0]['video_id'])
