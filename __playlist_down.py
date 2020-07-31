@@ -11,6 +11,7 @@ import platform
 from bs4 import BeautifulSoup
 from urllib.request import urlretrieve
 from selenium .webdriver.common.keys import Keys
+import pandas as pd
 
 
 def click(xpath, number):
@@ -104,7 +105,8 @@ for i in tqdm(range(number_of_songs//50+1),desc='플레이리스트 정보 다�
             bs_crawling(song_url[j],info)
             img_src = info[4][50*i+j]
             urlretrieve(img_src, download_path + '\%s'%list_names[num] + '\%s.jpg'%(info[0][50*i+j]))
-
+df = pd.DataFrame.from_records(info)
+df.transpose().to_excel('C:\\Users\안상훈\Desktop\youtube_download\%s\info.xlsx'%list_names[num])
 
 driver.get('https://www.youtube.com/')
 mute = 0
@@ -112,13 +114,10 @@ yt_urls = []
 for i in tqdm(range(number_of_songs),desc='url 복사중..'):
     element = driver.find_element_by_name("search_query")  # search창 지정
     element.clear()  # search창 클리어
-    element.send_keys(f'\"{info[0][i]} {info[1][i]}\" +audio +mp3 .video')
-    time.sleep(0.1)
+    element.send_keys(f"\"{info[0][i]} {info[1][i]}\" +audio +mp3 .video")
     element.send_keys(Keys.RETURN)  # 엔터
-    time.sleep(0.9)
+    time.sleep(1)
     yt_url_temp = driver.find_element_by_xpath('/html/body/ytd-app/div/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/ytd-thumbnail/a').get_attribute('href')
-    #a = int(input())
-    #yt_url_temp = driver.find_element_by_xpath('/html/body/ytd-app/div/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[%d]/div[1]/ytd-thumbnail/a'%a).get_attribute('href')
     yt_urls.append(yt_url_temp)
 
 driver.quit()
