@@ -24,7 +24,7 @@ def createFolder(directory):
         print('같은 폴더가 있습니다')
 
 
-def bs_crawling(url, info):
+def bs_crawling_melon(url, info):
     headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                               "(KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36"}
     soup = BeautifulSoup(requests.get(url,headers = headers).text,'html.parser')
@@ -106,7 +106,7 @@ def melon():
         time.sleep(1)
         song_url = ['https://www.melon.com/song/detail.htm?songId=' + x.get_attribute('href')[36:-3] for x in driver.find_elements_by_class_name('btn_icon_detail')]
         for j in range(len(song_url)):
-            bs_crawling(song_url[j], info)
+            bs_crawling_melon(song_url[j], info)
             img_src = info[4][50*i+j]
             urlretrieve(img_src, '%s.jpg' % (info[0][50*i+j]))
             down_mp4(info, 50*i+j)
@@ -117,7 +117,73 @@ def melon():
     return info
 
 
-def down_mp4(info,i):
+def genie():
+    def click(xpath):
+        while 1:
+            try:
+                driver.find_element_by_xpath(xpath).click()
+                break
+            except:
+                pass
+
+    if platform.node() == 'DESKTOP-DSPFGTE':
+        driver_path = 'C:\\Users\82105\PycharmProjects\YouTube_git2\chromedriver.exe'
+        download_path = 'C:\\Users\82105\Desktop\YouTube'
+    else:
+        driver_path = 'C:\\Users\안상훈\PycharmProjects\chromedriver.exe'
+        download_path = 'C:\\Users\안상훈\OneDrive - 서울시립대학교\음악'
+    os.chdir(download_path)
+
+    ID = 'ahnsang9@naver.com'
+    PW = 'wpgkrmfk1!'
+
+    options = webdriver.ChromeOptions()
+    #options.add_argument('headless')  # headless 옵션 설정
+    #options.add_argument("no-sandbox")  # headless 옵션 설정
+    driver = webdriver.Chrome(driver_path, options=options)
+    before_login = len(driver.window_handles)  # 시작시 윈도우 수
+
+    driver.get('https://accounts.kakao.com/login?continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%'
+               '2Fauthorize%3Fredirect_uri%3Dkakaojs%26response_type%3Dcode%26state%3Dqk4fnw078lj'
+               '4ddqwps86sf%26proxy%3DeasyXDM_Kakao_pl3elvbrfpe_provider%26ka%3Dsdk%252F1.39.4%252'
+               '0os%252Fjavascript%2520sdk_type%252Fjavascript%2520lang%252Fko-KR%2520device%252FW'
+               'in32%2520origin%252Fhttps%25253A%25252F%25252Fwww.genie.co.kr%26origin%3Dhttps%253A'
+               '%252F%252Fwww.genie.co.kr%26client_id%3D3d95e91552f8708aaf3ef3194a7b0544')  # 지니 로그인 페이지
+    driver.find_element_by_xpath('//*[@id="id_email_2"]').send_keys(ID)
+    driver.find_element_by_xpath('//*[@id="id_password_3"]').send_keys(PW)
+    click('//*[@id="login-form"]/fieldset/div[8]/button[1]')  # 로그인 실행
+    driver.get('https://genie.co.kr')
+    click('/html/body/div[3]/div[1]/div[3]/div/div/button') # 플레이리스트
+    list_names = [x.text for x in driver.find_elements_by_xpath('/html/body/div[2]/div[1]/div[3]/div/div[2]/div/div[2]/ul/a/text()')]
+    list_names_ = ['%d.%s' % (i+1, list_names[i]) for i in range(len(list_names))]
+    print(*list_names_, sep='  ')
+    print('\n다운로드 원하는 playlist 번호를 입력하세요')
+    num = int(input())
+    selected_list_name = list_names[num-1]
+    number_of_songs = int(driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[1]/div[2]/div[3]/ul/li[%d]/div[2]/ul/li[1]/text()' % num).text[8:-1])
+    click('/html/body/div[2]/div[2]/div[1]/div[2]/div[3]/ul/li[%d]/div[2]/div[1]/a' % num)  # 원하는 플레이리스트로 이동
+    createFolder(download_path + '\%s' % selected_list_name)
+    os.chdir(download_path + '\%s' % selected_list_name)
+
+    info = [[], [], [], [], [], []]  # 제목, 가수, 앨범, 장르, 커버사진, 가사
+    url_id = driver.current_url[-9:]
+    for i in tqdm(range(number_of_songs//50+1), desc='플레이리스트 정보 다운중...'):
+        driver.get('https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq=%s#params'
+                   '%%5BplylstSeq%%5D=%s&po=pageObj&startIndex=%d' % (url_id, url_id, 50*i+1))  # 페이지 이동
+        time.sleep(1)
+        song_url = ['https://www.melon.com/song/detail.htm?songId=' + x.get_attribute('href')[36:-3] for x in driver.find_elements_by_class_name('btn_icon_detail')]
+        for j in range(len(song_url)):
+            bs_crawling_melon(song_url[j], info)
+            img_src = info[4][50*i+j]
+            urlretrieve(img_src, '%s.jpg' % (info[0][50*i+j]))
+            down_mp4(info, 50*i+j)
+    df = pd.DataFrame.from_records(info)
+    df.transpose().to_excel('info.xlsx')
+    driver.quit()
+
+    return info
+
+def down_mp4(info, i):
     try:
         k = 1
         while 1:
@@ -160,7 +226,7 @@ def init_tag(info):
 
 def main():
     #pool = Pool(processes=4)
-    info = melon()
+    info = genie()
     translating()
     init_tag(info)
 
