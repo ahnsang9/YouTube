@@ -153,14 +153,14 @@ def genie():
     driver.find_element_by_xpath('//*[@id="id_password_3"]').send_keys(PW)
     click('//*[@id="login-form"]/fieldset/div[8]/button[1]')  # 로그인 실행
     driver.get('https://genie.co.kr')
-    click('/html/body/div[3]/div[1]/div[3]/div/div/button') # 플레이리스트
-    list_names = [x.text for x in driver.find_elements_by_xpath('/html/body/div[2]/div[1]/div[3]/div/div[2]/div/div[2]/ul/a/text()')]
+    click('/html/body/div[3]/div[1]/div[3]/div/div/button')  # 플레이리스트
+    list_names = [x.text for x in driver.find_elements_by_xpath('/html/body/div[2]/div[1]/div[3]/div/div[2]/div/div[2]/ul/a')]
     list_names_ = ['%d.%s' % (i+1, list_names[i]) for i in range(len(list_names))]
     print(*list_names_, sep='  ')
     print('\n다운로드 원하는 playlist 번호를 입력하세요')
     num = int(input())
     selected_list_name = list_names[num-1]
-    number_of_songs = int(driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[1]/div[2]/div[3]/ul/li[%d]/div[2]/ul/li[1]/text()' % num).text[8:-1])
+    number_of_songs = int(driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[1]/div[2]/div[3]/ul/li[%d]/div[2]/ul/li[1]' % num).text[8:-1])
     click('/html/body/div[2]/div[2]/div[1]/div[2]/div[3]/ul/li[%d]/div[2]/div[1]/a' % num)  # 원하는 플레이리스트로 이동
     createFolder(download_path + '\%s' % selected_list_name)
     os.chdir(download_path + '\%s' % selected_list_name)
